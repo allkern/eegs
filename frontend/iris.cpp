@@ -283,10 +283,10 @@ void update(iris::instance* iris) {
     if (!iris->pause) {
         ps2_cycle(iris->ps2);
 
-        for (const breakpoint& b : iris->breakpoints) {
-            if (iris->ps2->ee->pc == b.addr)
-                iris->pause = true;
-        }
+        // for (const breakpoint& b : iris->breakpoints) {
+        //     if (iris->ps2->ee->pc == b.addr)
+        //         iris->pause = true;
+        // }
     } else {
         if (iris->step) {
             ps2_cycle(iris->ps2);

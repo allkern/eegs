@@ -41,7 +41,7 @@ foreach ($SRC in $CXXSRC) {
 
     if (-Not (Test-Path $OBJ)) {
         c++ -c $SRC -o $OBJ `
-            -O3 -march=native -mtune=native `
+            -O3 -march=native -mtune=native -std=c++20 -fpermissive `
             -Wall -mssse3 -msse4 -D_EE_USE_INTRINSICS -Wno-format `
             -I"`"$($IMGUI_DIR)`"" `
             -I"`"$($IMGUI_DIR)\backends`"" `
@@ -60,7 +60,7 @@ $OBJS += ($CXXSRC -replace '.cpp$',".o")
 
 c++ @OBJS main.cpp -o iris `
     -O3 -march=native -mtune=native -lcomdlg32 -lole32 -lSDL2main -lSDL2 `
-    -Wall -mssse3 -msse4 -D_EE_USE_INTRINSICS -Wno-format -mwindows -ldwmapi `
+    -Wall -mssse3 -msse4 -D_EE_USE_INTRINSICS -Wno-format -ldwmapi `
     -I"`"$($IMGUI_DIR)`"" `
     -I"`"$($IMGUI_DIR)\backends`"" `
     -I"`"$($SDL2_DIR)\include`"" `

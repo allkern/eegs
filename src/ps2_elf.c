@@ -5,10 +5,12 @@
 #include "ps2_elf.h"
 
 int ps2_elf_load(struct ps2_state* ps2, const char* path) {
+    return;
+
     ps2_reset(ps2);
 
-    while (ps2->ee->pc != 0x00082000)
-        ps2_cycle(ps2);
+    // while (ps2->ee->pc != 0x00082000)
+    //     ps2_cycle(ps2);
 
     Elf32_Ehdr ehdr;
     FILE* file = fopen(path, "rb");
@@ -19,8 +21,8 @@ int ps2_elf_load(struct ps2_state* ps2, const char* path) {
         return 1;
     }
 
-    ps2->ee->pc = ehdr.e_entry;
-    ps2->ee->next_pc = ps2->ee->pc + 4;
+    // ps2->ee->pc = ehdr.e_entry;
+    // ps2->ee->next_pc = ps2->ee->pc + 4;
 
     Elf32_Phdr phdr;
 

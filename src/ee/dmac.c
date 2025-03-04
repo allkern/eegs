@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "dmac.h"
+#include "shared/ram.h"
 
 static inline uint128_t dmac_read_qword(struct ps2_dmac* dmac, uint32_t addr) {
     int spr = addr & 0x80000000;
@@ -224,12 +225,7 @@ static inline void dmac_test_cpcond0(struct ps2_dmac* dmac) {
 static inline void dmac_test_irq(struct ps2_dmac* dmac) {
     dmac_test_cpcond0(dmac);
 
-    if ((dmac->stat & 0x3ff) & ((dmac->stat >> 16) & 0x3ff)) {
-        ee_set_int1(dmac->ee);
-    } else {
-        // Reset INT1
-        dmac->ee->cause &= ~EE_CAUSE_IP3;
-    }
+    ee_set_int1(dmac->ee, (dmac->stat & 0x3ff) & ((dmac->stat >> 16) & 0x3ff));
 }
 
 static inline void dmac_set_irq(struct ps2_dmac* dmac, int ch) {

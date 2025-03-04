@@ -4,6 +4,7 @@
 #include <cctype>
 
 #include "iris.hpp"
+#include "ee/ee_cached.hpp"
 
 #include "res/IconsMaterialSymbols.h"
 

@@ -6,12 +6,7 @@
 #include "intc.h"
 
 static inline void intc_check_irq(struct ps2_intc* intc) {
-    if (intc->stat & intc->mask) {
-        // printf("ee: intc setting int0\n");
-        ee_set_int0(intc->ee);
-    } else {
-        intc->ee->cause &= ~EE_CAUSE_IP2;
-    }
+    ee_set_int0(intc->ee, intc->stat & intc->mask);
 }
 
 struct ps2_intc* ps2_intc_create(void) {

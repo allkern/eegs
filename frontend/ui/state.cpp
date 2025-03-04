@@ -9,6 +9,8 @@
 #include "ee/ee_dis.h"
 #include "iop/iop_dis.h"
 
+#include "ee/ee_cached.hpp"
+
 #define IM_RGB(r, g, b) ImVec4(((float)r / 255.0f), ((float)g / 255.0f), ((float)b / 255.0f), 1.0)
 
 namespace iris {

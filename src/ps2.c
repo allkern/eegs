@@ -73,7 +73,7 @@ void ps2_init(struct ps2_state* ps2) {
     iop_init(ps2->iop, iop_bus_data);
 
     // Initialize devices
-    ps2_dmac_init(ps2->ee_dma, ps2->sif, ps2->iop_dma, ps2->ee->scratchpad, ps2->ee, ps2->ee_bus);
+    ps2_dmac_init(ps2->ee_dma, ps2->sif, ps2->iop_dma, ee_get_spr(ps2->ee), ps2->ee, ps2->ee_bus);
     ps2_ram_init(ps2->ee_ram, RAM_SIZE_32MB);
     ps2_gif_init(ps2->gif, ps2->gs);
     ps2_vif_init(ps2->vif, ps2->ee_bus);
@@ -121,10 +121,12 @@ void ps2_init_kputchar(struct ps2_state* ps2, void (*ee_kputchar)(void*, char), 
 }
 
 void ps2_boot_file(struct ps2_state* ps2, const char* path) {
+    return;
+
     ps2_reset(ps2);
 
-    while (ps2->ee->pc != 0x00082000)
-        ps2_cycle(ps2);
+    // while (ps2->ee->pc != 0x00082000)
+    //     ps2_cycle(ps2);
 
     uint32_t i;
 
@@ -151,27 +153,27 @@ void ps2_reset(struct ps2_state* ps2) {
 
 // To-do: This will soon be useless, need to integrate
 // the tracer into our debugging UI
-static int depth = 0;
+// static int depth = 0;
 
-static inline void ps2_trace(struct ps2_state* ps2) {
-    for (int i = 0; i < ps2->nfuncs; i++) {
-        if (ps2->ee->pc == ps2->func[i].addr) {
-            printf("trace: ");
+// static inline void ps2_trace(struct ps2_state* ps2) {
+//     for (int i = 0; i < ps2->nfuncs; i++) {
+//         if (ps2->ee->pc == ps2->func[i].addr) {
+//             printf("trace: ");
 
-            for (int i = 0; i < depth; i++)
-                putchar(' ');
+//             for (int i = 0; i < depth; i++)
+//                 putchar(' ');
 
-            printf("%s @ 0x%08x\n", ps2->func[i].name, ps2->func[i].addr);
+//             printf("%s @ 0x%08x\n", ps2->func[i].name, ps2->func[i].addr);
 
-            ++depth;
+//             ++depth;
 
-            break;
-        }
-    }
+//             break;
+//         }
+//     }
 
-    if (ps2->ee->opcode == 0x03e00008)
-        if (depth > 0) --depth;
-}
+//     if (ps2->ee->opcode == 0x03e00008)
+//         if (depth > 0) --depth;
+// }
 
 void ps2_cycle(struct ps2_state* ps2) {
     // ps2_trace(ps2);
