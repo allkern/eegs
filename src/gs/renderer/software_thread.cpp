@@ -1084,8 +1084,9 @@ static inline void gs_write_fb(struct ps2_gs* gs, int x, int y, uint32_t c) {
 
         case GS_PSMCT24: {
             uint32_t addr = psmct32_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+            uint32_t v = gs->vram[addr];
 
-            gs->vram[addr] = f;
+            gs->vram[addr] = (v & 0xff000000) | (f & 0xffffff);
             // gs->vram[(gs->ctx->fbp + x + (y * gs->ctx->fbw)) & 0xfffff] = f;
         } break;
         case GS_PSMCT16: {
@@ -2481,9 +2482,6 @@ void transfer_start(struct ps2_gs* gs, void* udata) {
 static inline void gs_write_psmct32(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
     uint32_t addr = psmct32_addr(ctx->dbp, ctx->dbw, ctx->dx, ctx->dy);
 
-    if (ctx->dbp == gs->ctx->fbp)
-        addr = gs->ctx->fbp + (ctx->dx + (ctx->dy * gs->ctx->fbw));
-
     ctx->dx++;
 
     gs->vram[addr & 0xfffff] = data;
@@ -2494,15 +2492,25 @@ static inline void gs_write_psmct32(struct ps2_gs* gs, software_thread_state* ct
     }
 }
 
-static inline void gs_write_psmct32_or(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
+static inline void gs_write_psmt4hh(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
     uint32_t addr = psmct32_addr(ctx->dbp, ctx->dbw, ctx->dx, ctx->dy);
-
-    if (ctx->dbp == gs->ctx->fbp)
-        addr = gs->ctx->fbp + (ctx->dx + (ctx->dy * gs->ctx->fbw));
 
     ctx->dx++;
 
-    gs->vram[addr & 0xfffff] |= data;
+    gs->vram[addr] = (gs->vram[addr] & 0x0fffffff) | (data << 28);
+
+    if (ctx->dx == (ctx->rrw + ctx->dsax)) {
+        ctx->dx = ctx->dsax;
+        ctx->dy++;
+    }
+}
+
+static inline void gs_write_psmt4hl(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
+    uint32_t addr = psmct32_addr(ctx->dbp, ctx->dbw, ctx->dx, ctx->dy);
+
+    ctx->dx++;
+
+    gs->vram[addr] = (gs->vram[addr] & 0xf0ffffff) | (data << 24);
 
     if (ctx->dx == (ctx->rrw + ctx->dsax)) {
         ctx->dx = ctx->dsax;
@@ -2544,6 +2552,19 @@ static inline void gs_write_psmt8(struct ps2_gs* gs, software_thread_state* ctx,
     }
 }
 
+static inline void gs_write_psmt8h(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
+    uint32_t addr = psmct32_addr(ctx->dbp, ctx->dbw, ctx->dx, ctx->dy);
+
+    ctx->dx++;
+
+    gs->vram[addr] = (gs->vram[addr] & 0x00ffffff) | (data << 24);
+
+    if (ctx->dx == (ctx->rrw + ctx->dsax)) {
+        ctx->dx = ctx->dsax;
+        ctx->dy++;
+    }
+}
+
 static inline void gs_store_hwreg_psmt4(struct ps2_gs* gs, software_thread_state* ctx) {
     for (int i = 0; i < 16; i++) {
         uint64_t index = (gs->hwreg >> (i * 4)) & 0xf;
@@ -2556,7 +2577,7 @@ static inline void gs_store_hwreg_psmt4hh(struct ps2_gs* gs, software_thread_sta
     for (int i = 0; i < 16; i++) {
         uint64_t index = (gs->hwreg >> (i * 4)) & 0xf;
 
-        gs_write_psmct32_or(gs, ctx, index << 28);
+        gs_write_psmt4hh(gs, ctx, index);
     }
 }
 
@@ -2564,7 +2585,7 @@ static inline void gs_store_hwreg_psmt4hl(struct ps2_gs* gs, software_thread_sta
     for (int i = 0; i < 16; i++) {
         uint64_t index = (gs->hwreg >> (i * 4)) & 0xf;
 
-        gs_write_psmct32_or(gs, ctx, index << 24);
+        gs_write_psmt4hl(gs, ctx, index);
     }
 }
 
@@ -2580,7 +2601,7 @@ static inline void gs_store_hwreg_psmt8h(struct ps2_gs* gs, software_thread_stat
     for (int i = 0; i < 8; i++) {
         uint64_t index = (gs->hwreg >> (i * 8)) & 0xff;
 
-        gs_write_psmct32_or(gs, ctx, index << 24);
+        gs_write_psmt8h(gs, ctx, index);
     }
 }
 
@@ -2598,7 +2619,7 @@ static inline void gs_store_hwreg_psmct32(struct ps2_gs* gs, software_thread_sta
 static inline void gs_write_psmct24(struct ps2_gs* gs, software_thread_state* ctx, uint32_t data) {
     uint32_t addr = psmct32_addr(ctx->dbp, ctx->dbw, ctx->dx++, ctx->dy);
 
-    gs->vram[addr & 0xfffff] = data & 0xffffff;
+    gs->vram[addr] = (gs->vram[addr] & 0xff000000) | (data & 0xffffff);
 
     if (ctx->dx == (ctx->rrw + ctx->dsax)) {
         ctx->dx = ctx->dsax;
