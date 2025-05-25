@@ -717,6 +717,43 @@ static inline uint32_t gs_read_fb(struct ps2_gs* gs, int x, int y) {
     return 0;
 }
 
+static inline uint32_t gs_read_dispfb(struct ps2_gs* gs, int x, int y, int dfb) {
+    uint32_t dfbp = dfb ? gs->dfbp2 : gs->dfbp1;
+    uint32_t dfbw = dfb ? gs->dfbw2 : gs->dfbw1;
+    uint32_t dfbpsm = dfb ? gs->dfbpsm2 : gs->dfbpsm1;
+
+    switch (dfbpsm) {
+        case GS_PSMCT32: {
+            uint32_t addr = psmct32_addr(dfbp, dfbw, x, y);
+
+            return gs->vram[addr];
+        }
+        case GS_PSMCT24: {
+            uint32_t addr = psmct32_addr(dfbp, dfbw, x, y);
+
+            return gs->vram[addr] & 0xffffff;
+        }
+        case GS_PSMCT16: {
+            uint32_t addr = psmct16_addr(dfbp, dfbw, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            return vram[psmct16_shift[idx]];
+        } break;
+        case GS_PSMCT16S: {
+            uint32_t addr = psmct16s_addr(dfbp, dfbw, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            return vram[psmct16_shift[idx]];
+        } break;
+    }
+
+    return 0;
+}
+
 static inline uint32_t gs_read_zb(struct ps2_gs* gs, int x, int y) {
     switch (gs->ctx->zbpsm) {
         case GS_ZSMZ32:
@@ -2043,15 +2080,17 @@ void render(struct ps2_gs* gs, void* udata) {
     int en1 = ctx->gs->pmode & 1;
     int en2 = (ctx->gs->pmode >> 1) & 1;
 
-    uint64_t dispfb = 0;
+    uint32_t dfbp = 0;
+    int dfb = 0;
 
     if (en1) {
-        dispfb = ctx->gs->dispfb1;
+        dfb = 0;
+        dfbp = ctx->gs->dispfb1;
     } else if (en2) {
-        dispfb = ctx->gs->dispfb2;
+        dfb = 1;
+        dfbp = ctx->gs->dispfb2;
     }
 
-    uint32_t dfbp = (dispfb & 0x1ff) << 11;
     uint32_t* ptr = &gs->vram[dfbp];
 
     // printf("fbp=%x fbw=%d fbpsm=%d stride=%d dy=%d\n", dfbp, dfbw, dfbpsm, stride, dy);
@@ -2059,38 +2098,36 @@ void render(struct ps2_gs* gs, void* udata) {
     if (!ctx->tex_w)
         return;
 
-    // DESR BIOS sets SMODE2 to interlace + FIELD mode but doesn't
-    // actually seem to interlace the output
-    // if ((ctx->gs->smode2 & 3) == 3) {
-    //     // Need to deinterlace
-    //     int bpp = 0;
-    //     int odd = ((ctx->gs->csr >> 13) & 1) != 0;
+    if ((ctx->gs->smode2 & 3) == 3) {
+        // Need to deinterlace
+        int bpp = 0;
+        int odd = ((ctx->gs->csr >> 13) & 1) == 0;
 
-    //     switch (ctx->disp_fmt) {
-    //         case GS_PSMCT32:
-    //         case GS_PSMCT24: {
-    //             bpp = 4;
+        switch (ctx->disp_fmt) {
+            case GS_PSMCT32:
+            case GS_PSMCT24: {
+                bpp = 4;
 
-    //             for (int y = 0; y < ctx->tex_h / 2; y++) {
-    //                 for (int x = 0; x < ctx->tex_w; x++) {
-    //                     uint32_t* dst = buf + x + (((y * 2) + odd) * ctx->tex_w);
+                for (int y = 0; y < ctx->tex_h / 2; y++) {
+                    for (int x = 0; x < ctx->tex_w; x++) {
+                        uint32_t* dst = buf + x + (((y * 2) + odd) * ctx->tex_w);
 
-    //                     *dst = gs_read_fb(gs, x, y);
-    //                 }
-    //             }
-    //         } break;
-    //         case GS_PSMCT16:
-    //         case GS_PSMCT16S: {
-    //             for (int y = 0; y < ctx->tex_h / 2; y++) {
-    //                 for (int x = 0; x < ctx->tex_w; x++) {
-    //                     uint16_t* dst = ((uint16_t*)buf) + x + (((y * 2) + odd) * ctx->tex_w);
+                        *dst = gs_read_dispfb(gs, x, y, dfb);
+                    }
+                }
+            } break;
+            case GS_PSMCT16:
+            case GS_PSMCT16S: {
+                for (int y = 0; y < ctx->tex_h / 2; y++) {
+                    for (int x = 0; x < ctx->tex_w; x++) {
+                        uint16_t* dst = ((uint16_t*)buf) + x + (((y * 2) + odd) * ctx->tex_w);
 
-    //                     *dst = gs_read_fb(gs, x, y);
-    //                 }
-    //             }
-    //         } break;
-    //     }
-    // } else {
+                        *dst = gs_read_dispfb(gs, x, y, dfb);
+                    }
+                }
+            } break;
+        }
+    } else {
         switch (ctx->disp_fmt) {
             case GS_PSMCT32:
             case GS_PSMCT24: {
@@ -2098,7 +2135,7 @@ void render(struct ps2_gs* gs, void* udata) {
                     for (int x = 0; x < ctx->tex_w; x++) {
                         uint32_t* dst = buf + x + (y * ctx->tex_w);
 
-                        *dst = gs_read_fb(gs, x, y);
+                        *dst = gs_read_dispfb(gs, x, y, dfb);
                     }
                 }
             } break;
@@ -2108,12 +2145,12 @@ void render(struct ps2_gs* gs, void* udata) {
                     for (int x = 0; x < ctx->tex_w; x++) {
                         uint16_t* dst = ((uint16_t*)buf) + x + (y * ctx->tex_w);
 
-                        *dst = gs_read_fb(gs, x, y);
+                        *dst = gs_read_dispfb(gs, x, y, dfb);
                     }
                 }
             } break;
         }
-    // }
+    }
 
     ptr = buf;
 
