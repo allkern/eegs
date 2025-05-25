@@ -80,14 +80,14 @@ void ps2_init(struct ps2_state* ps2) {
 
     // Initialize devices
     ps2_dmac_init(ps2->ee_dma, ps2->sif, ps2->iop_dma, ps2->ee->scratchpad, ps2->ee, ps2->ee_bus);
-    ps2_ram_init(ps2->ee_ram, RAM_SIZE_32MB);
+    ps2_ram_init(ps2->ee_ram, RAM_SIZE_64MB); // 64 MB RDRAM
     ps2_gif_init(ps2->gif, ps2->gs);
     ps2_vif_init(ps2->vif, ps2->ee_intc, ps2->sched, ps2->ee_bus);
     ps2_gs_init(ps2->gs, ps2->ee_intc, ps2->iop_intc, ps2->ee_timers, ps2->iop_timers, ps2->sched);
     ps2_ipu_init(ps2->ipu, ps2->ee_dma, ps2->ee_intc);
     ps2_intc_init(ps2->ee_intc, ps2->ee, ps2->sched);
     ps2_ee_timers_init(ps2->ee_timers, ps2->ee_intc, ps2->sched);
-    ps2_ram_init(ps2->iop_ram, RAM_SIZE_2MB);
+    ps2_ram_init(ps2->iop_ram, 0x800000); // 8 MB EDO DRAM
     ps2_iop_dma_init(ps2->iop_dma, ps2->iop_intc, ps2->sif, ps2->cdvd, ps2->ee_dma, ps2->sio2, ps2->spu2, ps2->sched, ps2->iop_bus);
     ps2_ram_init(ps2->iop_spr, RAM_SIZE_1KB);
     ps2_iop_intc_init(ps2->iop_intc, ps2->iop);

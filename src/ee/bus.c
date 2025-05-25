@@ -105,10 +105,10 @@ void ee_bus_destroy(struct ee_bus* bus) {
 uint64_t ee_bus_read8(void* udata, uint32_t addr) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_READ(8, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(8, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(8, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(8, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_READ(8, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(8, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(8, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(8, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_READ(8, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_MEM_READ(8, 0x11000000, 0x11007FFF, vu, vu0);
     MAP_MEM_READ(8, 0x11008000, 0x1100FFFF, vu, vu1);
@@ -126,11 +126,11 @@ uint64_t ee_bus_read8(void* udata, uint32_t addr) {
 uint64_t ee_bus_read16(void* udata, uint32_t addr) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_READ(16, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(16, 0x20000000, 0x21FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(16, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(16, 0x20000000, 0x23FFFFFF, ram, ee_ram);
     MAP_MEM_READ(16, 0x1FC00000, 0x1FFFFFFF, bios, bios);
-    MAP_MEM_READ(16, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(16, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_READ(16, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(16, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_READ(16, 0x11000000, 0x11007FFF, vu, vu0);
     MAP_MEM_READ(16, 0x11008000, 0x1100FFFF, vu, vu1);
     MAP_MEM_READ(16, 0x1E000000, 0x1E3FFFFF, bios, rom1);
@@ -153,10 +153,10 @@ uint64_t ee_bus_read16(void* udata, uint32_t addr) {
 uint64_t ee_bus_read32(void* udata, uint32_t addr) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_READ(32, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(32, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(32, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(32, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_READ(32, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(32, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(32, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(32, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_READ(32, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_REG_READ(32, 0x1000F200, 0x1000F26F, sif, sif);
     MAP_REG_READ(32, 0x10008000, 0x1000EFFF, dmac, dmac);
@@ -219,10 +219,10 @@ uint64_t ee_bus_read32(void* udata, uint32_t addr) {
 uint64_t ee_bus_read64(void* udata, uint32_t addr) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_READ(64, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(64, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(64, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(64, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_READ(64, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(64, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(64, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(64, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_READ(64, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_REG_READ(64, 0x12000000, 0x12001FFF, gs, gs);
     MAP_REG_READ(64, 0x10002000, 0x1000203F, ipu, ipu);
@@ -243,10 +243,10 @@ uint64_t ee_bus_read64(void* udata, uint32_t addr) {
 uint128_t ee_bus_read128(void* udata, uint32_t addr) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_READ(128, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(128, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(128, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_READ(128, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_READ(128, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(128, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(128, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_READ(128, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_READ(128, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_REG_READ(128, 0x10004000, 0x10005FFF, vif, vif);
     MAP_REG_READ(128, 0x10007000, 0x1000701F, ipu, ipu);
@@ -263,10 +263,10 @@ uint128_t ee_bus_read128(void* udata, uint32_t addr) {
 void ee_bus_write8(void* udata, uint32_t addr, uint64_t data) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_WRITE(8, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(8, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(8, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(8, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(8, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(8, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(8, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(8, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_REG_WRITE(8, 0x10008000, 0x1000EFFF, dmac, dmac);
     MAP_REG_WRITE(8, 0x1000F520, 0x1000F5FF, dmac, dmac);
     MAP_REG_WRITE(8, 0x1F402004, 0x1F402018, cdvd, cdvd);
@@ -283,10 +283,10 @@ void ee_bus_write8(void* udata, uint32_t addr, uint64_t data) {
 void ee_bus_write16(void* udata, uint32_t addr, uint64_t data) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_WRITE(16, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(16, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(16, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(16, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(16, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(16, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(16, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(16, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(16, 0x11000000, 0x11007FFF, vu, vu0);
     MAP_MEM_WRITE(16, 0x11008000, 0x1100FFFF, vu, vu1);
     MAP_REG_WRITE(16, 0x1000F000, 0x1000F01F, intc, intc);
@@ -304,9 +304,9 @@ void ee_bus_write16(void* udata, uint32_t addr, uint64_t data) {
 void ee_bus_write32(void* udata, uint32_t addr, uint64_t data) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_WRITE(32, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(32, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(32, 0x30000000, 0x31FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(32, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(32, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(32, 0x30000000, 0x33FFFFFF, ram, ee_ram);
     MAP_REG_WRITE(32, 0x10000000, 0x10001FFF, ee_timers, timers);
     MAP_REG_WRITE(64, 0x10002000, 0x1000203F, ipu, ipu);
     MAP_REG_WRITE(32, 0x10003000, 0x100037FF, gif, gif);
@@ -317,7 +317,7 @@ void ee_bus_write32(void* udata, uint32_t addr, uint64_t data) {
     MAP_REG_WRITE(32, 0x10003800, 0x10005FFF, vif, vif);
     MAP_REG_WRITE(32, 0x1000F520, 0x1000F5FF, dmac, dmac);
     MAP_REG_WRITE(64, 0x12000000, 0x12001FFF, gs, gs); // Reuse 64-bit function
-    MAP_MEM_WRITE(32, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(32, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(32, 0x11000000, 0x11007FFF, vu, vu0);
     MAP_MEM_WRITE(32, 0x11008000, 0x1100FFFF, vu, vu1);
     MAP_MEM_WRITE(32, 0x1FC00000, 0x1FFFFFFF, bios, bios);
@@ -358,10 +358,10 @@ void ee_bus_write32(void* udata, uint32_t addr, uint64_t data) {
 void ee_bus_write64(void* udata, uint32_t addr, uint64_t data) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_WRITE(64, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(64, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(64, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(64, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(64, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(64, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(64, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(64, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_REG_WRITE(64, 0x12000000, 0x12002000, gs, gs);
     MAP_REG_WRITE(64, 0x10002000, 0x1000203F, ipu, ipu);
     MAP_REG_WRITE(64, 0x10007000, 0x1000701F, ipu, ipu);
@@ -378,10 +378,10 @@ void ee_bus_write64(void* udata, uint32_t addr, uint64_t data) {
 void ee_bus_write128(void* udata, uint32_t addr, uint128_t data) {
     struct ee_bus* bus = (struct ee_bus*)udata;
 
-    MAP_MEM_WRITE(128, 0x00000000, 0x01FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(128, 0x20000000, 0x21FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(128, 0x30000000, 0x31FFFFFF, ram, ee_ram);
-    MAP_MEM_WRITE(128, 0x1C000000, 0x1C1FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(128, 0x00000000, 0x03FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(128, 0x20000000, 0x23FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(128, 0x30000000, 0x33FFFFFF, ram, ee_ram);
+    MAP_MEM_WRITE(128, 0x1C000000, 0x1C7FFFFF, ram, iop_ram);
     MAP_REG_WRITE(128, 0x10006000, 0x10006FFF, gif, gif);
     MAP_REG_WRITE(128, 0x10007000, 0x1000701F, ipu, ipu);
     MAP_REG_WRITE(128, 0x10004000, 0x10005FFF, vif, vif);

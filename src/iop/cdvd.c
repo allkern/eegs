@@ -201,6 +201,18 @@ static inline void cdvd_s_mechacon_version(struct ps2_cdvd* cdvd) {
             cdvd->s_fifo[2] = 0x05;
         } break;
 
+        // sceCdReadRenewalDate (sent by PSX DESR BIOS)
+        case 0xfd: {
+            cdvd_init_s_fifo(cdvd, 6);
+
+            cdvd->s_fifo[0] = 0;
+            cdvd->s_fifo[1] = 0x04; //year
+            cdvd->s_fifo[2] = 0x12; //month
+            cdvd->s_fifo[3] = 0x10; //day
+            cdvd->s_fifo[4] = 0x01; //hour
+            cdvd->s_fifo[5] = 0x30; //min
+        } break;
+
         default: {
             printf("cdvd: Unknown S subcommand %02x\n", cdvd->s_params[0]);
 
@@ -267,6 +279,11 @@ static inline void cdvd_s_forbid_dvd(struct ps2_cdvd* cdvd) {
 
     cdvd->s_fifo[0] = 5;
 }
+static inline void cdvd_s_auto_adjust_ctrl(struct ps2_cdvd* cdvd) {
+    cdvd_init_s_fifo(cdvd, 1);
+
+    cdvd->s_fifo[0] = 0;
+}
 static inline void cdvd_s_read_ilink_model(struct ps2_cdvd* cdvd) {
     cdvd_init_s_fifo(cdvd, 9);
 
@@ -291,6 +308,16 @@ static inline void cdvd_s_read_wakeup_time(struct ps2_cdvd* cdvd) {
 }
 static inline void cdvd_s_rc_bypass_ctrl(struct ps2_cdvd* cdvd) {
     cdvd_init_s_fifo(cdvd, 1);
+
+    cdvd->s_fifo[0] = 0;
+}
+static inline void cdvd_s_notice_game_start(struct ps2_cdvd* cdvd) {
+    cdvd_init_s_fifo(cdvd, 1);
+
+    cdvd->s_fifo[0] = 0;
+}
+static inline void cdvd_s_get_medium_removal(struct ps2_cdvd* cdvd) {
+    cdvd_init_s_fifo(cdvd, 2);
 
     cdvd->s_fifo[0] = 0;
 }
@@ -436,12 +463,15 @@ void cdvd_handle_s_command(struct ps2_cdvd* cdvd, uint8_t cmd) {
         // case 0x0f: printf("cdvd: power_off\n"); cdvd_s_power_off(cdvd); break;
         case 0x12: printf("cdvd: read_ilink_id\n"); cdvd_s_read_ilink_id(cdvd); break;
         case 0x15: printf("cdvd: forbid_dvd\n"); cdvd_s_forbid_dvd(cdvd); break;
+        case 0x16: printf("cdvd: auto_adjust_ctrl\n"); cdvd_s_auto_adjust_ctrl(cdvd); break;
         case 0x17: printf("cdvd: read_ilink_model\n"); cdvd_s_read_ilink_model(cdvd); break;
         case 0x1a: printf("cdvd: certify_boot\n"); cdvd_s_certify_boot(cdvd); break;
         case 0x1b: printf("cdvd: cancel_pwoff_ready\n"); cdvd_s_cancel_pwoff_ready(cdvd); break;
         case 0x1e: printf("cdvd: remote2_read\n"); cdvd_s_remote2_read(cdvd); break;
         case 0x22: printf("cdvd: read_wakeup_time\n"); cdvd_s_read_wakeup_time(cdvd); break;
         case 0x24: printf("cdvd: rc_bypass_ctrl\n"); cdvd_s_rc_bypass_ctrl(cdvd); break;
+        case 0x29: printf("cdvd: notice_game_start\n"); cdvd_s_notice_game_start(cdvd); break;
+        case 0x32: printf("cdvd: get_medium_removal\n"); cdvd_s_get_medium_removal(cdvd); break; 
         case 0x36: printf("cdvd: get_region_params\n"); cdvd_s_get_region_params(cdvd); break;
         case 0x40: printf("cdvd: open_config\n"); cdvd_s_open_config(cdvd); break;
         case 0x41: printf("cdvd: read_config\n"); cdvd_s_read_config(cdvd); break;
@@ -1150,6 +1180,7 @@ uint64_t ps2_cdvd_read8(struct ps2_cdvd* cdvd, uint32_t addr) {
         case 0x1F40200B: /* printf("cdvd: read sticky_status %x\n", cdvd->sticky_status); */ return cdvd->sticky_status;
         case 0x1F40200F: /* printf("cdvd: read disc_type %x\n", cdvd->disc_type); */ return cdvd->disc_type;
         case 0x1F402013: /* printf("cdvd: read speed %x\n", cdvd_read_speed(cdvd)); return */ cdvd_read_speed(cdvd);
+        case 0x1F402015: return 0xff;
         case 0x1F402016: /* printf("cdvd: read s_cmd %x\n", cdvd->s_cmd); */ return cdvd->s_cmd;
         case 0x1F402017: /* printf("cdvd: read s_stat %x\n", cdvd->s_stat); */ return cdvd->s_stat;
         // case 0x1F402017: (W);

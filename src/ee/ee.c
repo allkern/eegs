@@ -192,8 +192,8 @@ static inline int ee_translate_virt(struct ee_state* ee, uint32_t virt, uint32_t
         return 0;
     }
 
-    if (virt >= 0x00000000 && virt <= 0x01FFFFFF) {
-        *phys = virt & 0x1FFFFFF;
+    if (virt >= 0x00000000 && virt <= 0x03FFFFFF) {
+        *phys = virt & 0x3FFFFFF;
 
         return 0;
     }
@@ -204,14 +204,14 @@ static inline int ee_translate_virt(struct ee_state* ee, uint32_t virt, uint32_t
         return 0;
     }
 
-    if (virt >= 0x20000000 && virt <= 0x21FFFFFF) {
-        *phys = virt & 0x1FFFFFF;
+    if (virt >= 0x20000000 && virt <= 0x23FFFFFF) {
+        *phys = virt & 0x3FFFFFF;
 
         return 0;
     }
 
-    if (virt >= 0x30000000 && virt <= 0x31FFFFFF) {
-        *phys = virt & 0x1FFFFFF;
+    if (virt >= 0x30000000 && virt <= 0x33FFFFFF) {
+        *phys = virt & 0x3FFFFFF;
 
         return 0;
     }

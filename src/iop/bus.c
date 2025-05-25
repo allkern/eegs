@@ -88,7 +88,7 @@ void iop_bus_destroy(struct iop_bus* bus) {
 uint32_t iop_bus_read8(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_READ(8, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_READ(8, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_READ(8, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_READ(8, 0x1F402004, 0x1F4020FF, cdvd, cdvd);
     MAP_REG_READ(8, 0x1F808200, 0x1F808280, sio2, sio2);
@@ -105,7 +105,7 @@ uint32_t iop_bus_read16(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
     MAP_MEM_READ(16, 0x1FC00000, 0x1FFFFFFF, bios, bios);
-    MAP_MEM_READ(16, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_READ(16, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_READ(16, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_READ(32, 0x1F801100, 0x1F80112F, iop_timers, timers);
     MAP_REG_READ(32, 0x1F801480, 0x1F8014AF, iop_timers, timers);
@@ -136,7 +136,7 @@ uint32_t iop_bus_read16(void* udata, uint32_t addr) {
 uint32_t iop_bus_read32(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_READ(32, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_READ(32, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_READ(32, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_READ(32, 0x1D000000, 0x1D00006F, sif, sif);
     MAP_REG_READ(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
@@ -170,7 +170,7 @@ uint32_t iop_bus_read32(void* udata, uint32_t addr) {
 void iop_bus_write8(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(8, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(8, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(8, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(8, 0x1F402004, 0x1F4020FF, cdvd, cdvd);
     MAP_REG_WRITE(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
@@ -187,7 +187,7 @@ void iop_bus_write8(void* udata, uint32_t addr, uint32_t data) {
 void iop_bus_write16(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(16, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(16, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(16, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(32, 0x1F801100, 0x1F80112F, iop_timers, timers);
     MAP_REG_WRITE(32, 0x1F801480, 0x1F8014AF, iop_timers, timers);
@@ -205,7 +205,7 @@ void iop_bus_write16(void* udata, uint32_t addr, uint32_t data) {
 void iop_bus_write32(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(32, 0x00000000, 0x001FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(32, 0x00000000, 0x007FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(32, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(32, 0x1D000000, 0x1D00006F, sif, sif);
     MAP_REG_WRITE(32, 0x1F801070, 0x1F80107B, iop_intc, intc);

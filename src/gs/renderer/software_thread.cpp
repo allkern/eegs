@@ -685,18 +685,33 @@ enum : int {
 
 static inline uint32_t gs_read_fb(struct ps2_gs* gs, int x, int y) {
     switch (gs->ctx->fbpsm) {
-        case GS_PSMCT32:
-            return gs->vram[gs->ctx->fbp + x + (y * gs->ctx->fbw)];
-        case GS_PSMCT24:
-            return gs->vram[gs->ctx->fbp + x + (y * gs->ctx->fbw)] & 0xffffff;
-        case GS_PSMCT16:
-        case GS_PSMCT16S: {
-            int shift = (x & 1) << 4;
-            uint32_t mask = 0xffff << shift;
-            uint32_t data = gs->vram[gs->ctx->fbp + (x >> 1) + (y * (gs->ctx->fbw >> 1))];
+        case GS_PSMCT32: {
+            uint32_t addr = psmct32_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
 
-            return (data & mask) >> shift;
+            return gs->vram[addr];
         }
+            // return gs->vram[gs->ctx->fbp + x + (y * gs->ctx->fbw)];
+        case GS_PSMCT24: {
+            uint32_t addr = psmct32_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+
+            return gs->vram[addr] & 0xffffff;
+        }
+        case GS_PSMCT16: {
+            uint32_t addr = psmct16_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            return vram[psmct16_shift[idx]];
+        } break;
+        case GS_PSMCT16S: {
+            uint32_t addr = psmct16s_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            return vram[psmct16_shift[idx]];
+        } break;
     }
 
     return 0;
@@ -1024,17 +1039,33 @@ static inline void gs_write_fb(struct ps2_gs* gs, int x, int y, uint32_t c) {
     // To-do: Implement FBMSK
     switch (gs->ctx->fbpsm) {
         case GS_PSMCT32: {
-            gs->vram[(gs->ctx->fbp + x + (y * gs->ctx->fbw)) & 0xfffff] = f;
+            uint32_t addr = psmct32_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+
+            gs->vram[addr] = f;
+            // gs->vram[(gs->ctx->fbp + x + (y * gs->ctx->fbw)) & 0xfffff] = f;
         } break;
 
         case GS_PSMCT24: {
-            gs->vram[(gs->ctx->fbp + x + (y * gs->ctx->fbw)) & 0xfffff] = f;
-        } break;
-        case GS_PSMCT16:
-        case GS_PSMCT16S: {
-            uint16_t* ptr = ((uint16_t*)&gs->vram[gs->ctx->fbp]) + x + (y * gs->ctx->fbw);
+            uint32_t addr = psmct32_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
 
-            *ptr = f;
+            gs->vram[addr] = f;
+            // gs->vram[(gs->ctx->fbp + x + (y * gs->ctx->fbw)) & 0xfffff] = f;
+        } break;
+        case GS_PSMCT16: {
+            uint32_t addr = psmct16_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            vram[psmct16_shift[idx]] = f;
+        } break;
+        case GS_PSMCT16S: {
+            uint32_t addr = psmct16s_addr(gs->ctx->fbp >> 6, gs->ctx->fbw >> 6, x, y);
+            uint16_t* vram = (uint16_t*)(&gs->vram[addr]);
+
+            int idx = (x & 15) + ((y & 1) * 16);
+
+            vram[psmct16_shift[idx]] = f;
         } break;
     }
 }
@@ -1869,23 +1900,15 @@ void render_sprite(struct ps2_gs* gs, void* udata) {
     int z = v1.z;
     int a = v1.a;
 
-    // printf("gs: Sprite at (%d,%d-%d,%d) min=(%d,%d) max=(%d,%d) ate=%d atst=%d afail=%d aref=%02x zte=%d ztst=%d zmsk=%d z=%d zbp=%x fbp=%x tme=%d abe=%d rgba=%08lx scissor=(%d,%d-%d,%d) ctx=%d\n",
+    // printf("gs: Sprite at (%d,%d-%d,%d) min=(%d,%d) max=(%d,%d) fbp=%x fbpsm=%x tme=%d tbp=%x rgba=%08lx scissor=(%d,%d-%d,%d) ctx=%d\n",
     //     v0.x, v0.y,
     //     v1.x, v1.y,
     //     xmin, ymin,
     //     xmax, ymax,
-    //     gs->ctx->ate,
-    //     gs->ctx->atst,
-    //     gs->ctx->afail,
-    //     gs->ctx->aref,
-    //     gs->ctx->zte,
-    //     gs->ctx->ztst,
-    //     gs->ctx->zbmsk,
-    //     z,
-    //     gs->ctx->zbp,
     //     gs->ctx->fbp,
+    //     gs->ctx->fbpsm,
     //     gs->tme,
-    //     gs->abe,
+    //     gs->ctx->tbp0,
     //     v1.rgbaq & 0xffffffff,
     //     gs->ctx->scax0, gs->ctx->scay0,
     //     gs->ctx->scax1, gs->ctx->scay1,
@@ -2036,39 +2059,63 @@ void render(struct ps2_gs* gs, void* udata) {
     if (!ctx->tex_w)
         return;
 
-    if ((ctx->gs->smode2 & 3) == 3) {
-        // Need to deinterlace
-        int bpp = 0;
+    // DESR BIOS sets SMODE2 to interlace + FIELD mode but doesn't
+    // actually seem to interlace the output
+    // if ((ctx->gs->smode2 & 3) == 3) {
+    //     // Need to deinterlace
+    //     int bpp = 0;
+    //     int odd = ((ctx->gs->csr >> 13) & 1) != 0;
 
+    //     switch (ctx->disp_fmt) {
+    //         case GS_PSMCT32:
+    //         case GS_PSMCT24: {
+    //             bpp = 4;
+
+    //             for (int y = 0; y < ctx->tex_h / 2; y++) {
+    //                 for (int x = 0; x < ctx->tex_w; x++) {
+    //                     uint32_t* dst = buf + x + (((y * 2) + odd) * ctx->tex_w);
+
+    //                     *dst = gs_read_fb(gs, x, y);
+    //                 }
+    //             }
+    //         } break;
+    //         case GS_PSMCT16:
+    //         case GS_PSMCT16S: {
+    //             for (int y = 0; y < ctx->tex_h / 2; y++) {
+    //                 for (int x = 0; x < ctx->tex_w; x++) {
+    //                     uint16_t* dst = ((uint16_t*)buf) + x + (((y * 2) + odd) * ctx->tex_w);
+
+    //                     *dst = gs_read_fb(gs, x, y);
+    //                 }
+    //             }
+    //         } break;
+    //     }
+    // } else {
         switch (ctx->disp_fmt) {
             case GS_PSMCT32:
             case GS_PSMCT24: {
-                bpp = 4;
+                for (int y = 0; y < ctx->tex_h; y++) {
+                    for (int x = 0; x < ctx->tex_w; x++) {
+                        uint32_t* dst = buf + x + (y * ctx->tex_w);
+
+                        *dst = gs_read_fb(gs, x, y);
+                    }
+                }
             } break;
             case GS_PSMCT16:
             case GS_PSMCT16S: {
-                bpp = 2;
+                for (int y = 0; y < ctx->tex_h; y++) {
+                    for (int x = 0; x < ctx->tex_w; x++) {
+                        uint16_t* dst = ((uint16_t*)buf) + x + (y * ctx->tex_w);
+
+                        *dst = gs_read_fb(gs, x, y);
+                    }
+                }
             } break;
         }
+    // }
 
-        int stride = ctx->tex_w * bpp;
-        int odd = ((ctx->gs->csr >> 13) & 1) == 0;
-        int sy = 0;
-
-        // printf("csr.12=%d csr.13=%d\n",
-        //     (ctx->gs->csr >> 12) & 1,
-        //     (ctx->gs->csr >> 13) & 1
-        // );
-
-        for (int y = 0; y < ctx->tex_h / 2; y++) {
-            uint8_t* dst = ((uint8_t*)buf) + (stride * ((y * 2) + odd));
-            uint8_t* src = ((uint8_t*)ptr) + (stride * y);
-
-            memcpy(dst, src, stride);
-        }
-
-        ptr = buf;
-    }
+    ptr = buf;
 
     SDL_Rect size, rect;
 
