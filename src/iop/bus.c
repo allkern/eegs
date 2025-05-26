@@ -69,6 +69,14 @@ void iop_bus_init_fw(struct iop_bus* bus, struct ps2_fw* fw) {
     bus->fw = fw;
 }
 
+void iop_bus_init_dev9(struct iop_bus* bus, struct ps2_dev9* dev9) {
+    bus->dev9 = dev9;
+}
+
+void iop_bus_init_speed(struct iop_bus* bus, struct ps2_speed* speed) {
+    bus->speed = speed;
+}
+
 void iop_bus_destroy(struct iop_bus* bus) {
     free(bus);
 }
@@ -88,11 +96,14 @@ void iop_bus_destroy(struct iop_bus* bus) {
 uint32_t iop_bus_read8(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_READ(8, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_READ(8, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_READ(8, 0x1F800000, 0x1F8003FF, ram, iop_spr);
+    MAP_REG_READ(8, 0x1F801070, 0x1F80107B, iop_intc, intc);
     MAP_REG_READ(8, 0x1F402004, 0x1F4020FF, cdvd, cdvd);
     MAP_REG_READ(8, 0x1F808200, 0x1F808280, sio2, sio2);
     MAP_MEM_READ(8, 0x1FC00000, 0x1FFFFFFF, bios, bios);
+    MAP_REG_READ(8, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_READ(8, 0x10000000, 0x10000FFF, speed, speed);
     MAP_MEM_READ(8, 0x1E000000, 0x1E3FFFFF, bios, rom1);
     MAP_MEM_READ(8, 0x1E400000, 0x1E7FFFFF, bios, rom2);
 
@@ -105,15 +116,18 @@ uint32_t iop_bus_read16(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
     MAP_MEM_READ(16, 0x1FC00000, 0x1FFFFFFF, bios, bios);
-    MAP_MEM_READ(16, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_READ(16, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_READ(16, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_READ(32, 0x1F801100, 0x1F80112F, iop_timers, timers);
     MAP_REG_READ(32, 0x1F801480, 0x1F8014AF, iop_timers, timers);
+    MAP_REG_READ(16, 0x1F801070, 0x1F80107B, iop_intc, intc);
     MAP_REG_READ(16, 0x1F801080, 0x1F8010EF, iop_dma, dma);
     MAP_REG_READ(16, 0x1F801500, 0x1F80155F, iop_dma, dma);
     MAP_REG_READ(16, 0x1F801570, 0x1F80157F, iop_dma, dma);
     MAP_REG_READ(16, 0x1F8010F0, 0x1F8010F8, iop_dma, dma);
     MAP_REG_READ(16, 0x1F900000, 0x1F9007FF, spu2, spu2);
+    MAP_REG_READ(16, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_READ(16, 0x10000000, 0x10000FFF, speed, speed);
     MAP_MEM_READ(16, 0x1E000000, 0x1E3FFFFF, bios, rom1);
     MAP_MEM_READ(16, 0x1E400000, 0x1E7FFFFF, bios, rom2);
 
@@ -136,7 +150,7 @@ uint32_t iop_bus_read16(void* udata, uint32_t addr) {
 uint32_t iop_bus_read32(void* udata, uint32_t addr) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_READ(32, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_READ(32, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_READ(32, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_READ(32, 0x1D000000, 0x1D00006F, sif, sif);
     MAP_REG_READ(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
@@ -150,6 +164,8 @@ uint32_t iop_bus_read32(void* udata, uint32_t addr) {
     MAP_MEM_READ(32, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_REG_READ(32, 0x1F801600, 0x1F8016FF, usb, usb);
     MAP_REG_READ(32, 0x1F808400, 0x1F80854F, fw, fw);
+    MAP_REG_READ(32, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_READ(32, 0x10000000, 0x10000FFF, speed, speed);
     MAP_MEM_READ(32, 0x1E000000, 0x1E3FFFFF, bios, rom1);
     MAP_MEM_READ(32, 0x1E400000, 0x1E7FFFFF, bios, rom2);
 
@@ -170,14 +186,16 @@ uint32_t iop_bus_read32(void* udata, uint32_t addr) {
 void iop_bus_write8(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(8, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(8, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(8, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(8, 0x1F402004, 0x1F4020FF, cdvd, cdvd);
-    MAP_REG_WRITE(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
+    MAP_REG_WRITE(8, 0x1F801070, 0x1F80107B, iop_intc, intc);
     MAP_REG_WRITE(32, 0x1F801080, 0x1F8010EF, iop_dma, dma);
     MAP_REG_WRITE(32, 0x1F801500, 0x1F80155F, iop_dma, dma);
     MAP_REG_WRITE(32, 0x1F801570, 0x1F80157F, iop_dma, dma);
     MAP_REG_WRITE(32, 0x1F8010F0, 0x1F8010F8, iop_dma, dma);
+    MAP_REG_WRITE(8, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_WRITE(8, 0x10000000, 0x10000FFF, speed, speed);
     MAP_REG_WRITE(8, 0x1F808200, 0x1F808280, sio2, sio2);
     MAP_MEM_WRITE(8, 0x1FC00000, 0x1FFFFFFF, bios, bios);
 
@@ -187,16 +205,18 @@ void iop_bus_write8(void* udata, uint32_t addr, uint32_t data) {
 void iop_bus_write16(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(16, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(16, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(16, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(32, 0x1F801100, 0x1F80112F, iop_timers, timers);
     MAP_REG_WRITE(32, 0x1F801480, 0x1F8014AF, iop_timers, timers);
-    MAP_REG_WRITE(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
+    MAP_REG_WRITE(16, 0x1F801070, 0x1F80107B, iop_intc, intc);
     MAP_REG_WRITE(16, 0x1F801080, 0x1F8010EF, iop_dma, dma);
     MAP_REG_WRITE(16, 0x1F801500, 0x1F80155F, iop_dma, dma);
     MAP_REG_WRITE(16, 0x1F801570, 0x1F80157F, iop_dma, dma);
     MAP_REG_WRITE(16, 0x1F8010F0, 0x1F8010F8, iop_dma, dma);
     MAP_REG_WRITE(16, 0x1F900000, 0x1F9007FF, spu2, spu2);
+    MAP_REG_WRITE(16, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_WRITE(16, 0x10000000, 0x10000FFF, speed, speed);
     MAP_MEM_WRITE(16, 0x1FC00000, 0x1FFFFFFF, bios, bios);
 
     printf("iop_bus: Unhandled 16-bit write to physical address 0x%08x (0x%04x)\n", addr, data);
@@ -205,7 +225,7 @@ void iop_bus_write16(void* udata, uint32_t addr, uint32_t data) {
 void iop_bus_write32(void* udata, uint32_t addr, uint32_t data) {
     struct iop_bus* bus = (struct iop_bus*)udata;
 
-    MAP_MEM_WRITE(32, 0x00000000, 0x007FFFFF, ram, iop_ram);
+    MAP_MEM_WRITE(32, 0x00000000, 0x001FFFFF, ram, iop_ram);
     MAP_MEM_WRITE(32, 0x1F800000, 0x1F8003FF, ram, iop_spr);
     MAP_REG_WRITE(32, 0x1D000000, 0x1D00006F, sif, sif);
     MAP_REG_WRITE(32, 0x1F801070, 0x1F80107B, iop_intc, intc);
@@ -219,6 +239,8 @@ void iop_bus_write32(void* udata, uint32_t addr, uint32_t data) {
     MAP_MEM_WRITE(32, 0x1FC00000, 0x1FFFFFFF, bios, bios);
     MAP_REG_WRITE(32, 0x1F801600, 0x1F8016FF, usb, usb);
     MAP_REG_WRITE(32, 0x1F808400, 0x1F80854F, fw, fw);
+    MAP_REG_WRITE(32, 0x1F801460, 0x1F80147F, dev9, dev9);
+    MAP_REG_WRITE(32, 0x10000000, 0x10000FFF, speed, speed);
 
     if (addr == 0x1f801450) return;
 

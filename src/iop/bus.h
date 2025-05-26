@@ -18,6 +18,8 @@ extern "C" {
 #include "sio2.h"
 #include "spu2.h"
 #include "usb.h"
+#include "dev9.h"
+#include "speed.h"
 #include "fw.h"
 
 struct iop_bus {
@@ -35,6 +37,8 @@ struct iop_bus {
     struct ps2_spu2* spu2;
     struct ps2_usb* usb;
     struct ps2_fw* fw;
+    struct ps2_dev9* dev9;
+    struct ps2_speed* speed;
 };
 
 void iop_bus_init_bios(struct iop_bus* bus, struct ps2_bios* bios);
@@ -51,6 +55,8 @@ void iop_bus_init_sio2(struct iop_bus* bus, struct ps2_sio2* sio2);
 void iop_bus_init_spu2(struct iop_bus* bus, struct ps2_spu2* spu2);
 void iop_bus_init_usb(struct iop_bus* bus, struct ps2_usb* usb);
 void iop_bus_init_fw(struct iop_bus* bus, struct ps2_fw* fw);
+void iop_bus_init_dev9(struct iop_bus* bus, struct ps2_dev9* dev9);
+void iop_bus_init_speed(struct iop_bus* bus, struct ps2_speed* speed);
 
 #ifdef __cplusplus
 }

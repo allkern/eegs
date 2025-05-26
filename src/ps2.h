@@ -24,6 +24,8 @@ extern "C" {
 #include "iop/spu2.h"
 #include "iop/usb.h"
 #include "iop/fw.h"
+#include "iop/dev9.h"
+#include "iop/speed.h"
 #include "shared/bios.h"
 #include "shared/ram.h"
 #include "shared/sif.h"
@@ -78,6 +80,8 @@ struct ps2_state {
     struct ps2_bios* rom1; // Mapped to 1E000000-1E3FFFFF (DVD firmware)
     struct ps2_bios* rom2; // Mapped to 1E400000-1E7FFFFF (Chinese exts)
     struct ps2_sif* sif;
+    struct ps2_dev9* dev9;
+    struct ps2_speed* speed;
 
     struct sched_state* sched;
 
